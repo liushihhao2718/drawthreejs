@@ -24,7 +24,10 @@ class Path{
 		let error_flag = false;
 		let d = '';
 		let index = this.head;
-		do{
+		let error_code = 0;
+		for(let i=0;i<this.nodes.length;i++){
+						console.log('index'+index);
+
 			let n = this.nodes[index];
 			if (error_flag)  break;
 			switch(state){
@@ -33,7 +36,7 @@ class Path{
 					state = 'curve';
 					d+=`M${n.x},${n.y}`;
 				}
-				else error();
+				else error(1);
 				break;
 			case 'curve':
 				if(n.type === 'line'){
@@ -43,7 +46,7 @@ class Path{
 				else if(n.type === 'offcurve'){
 					state = 'offcurve';
 					buffer.push(n);
-				}else error();
+				}else error(2);
 				break;
 			case 'line':
 				if(n.type === 'line'){
@@ -54,14 +57,14 @@ class Path{
 					state = 'curve';
 					d+=` L${n.x},${n.y}`;
 				}
-				else error();
+				else error(3);
 				break;
 			case 'offcurve':
 				if (n.type === 'offcurve') {
 					state = 'offcurve2';
 					buffer.push(n);
 				}
-				else error();
+				else error(4);
 				break;
 			case 'offcurve2':
 				if(n.type === 'curve' || n.type==='smooth'){
@@ -72,19 +75,19 @@ class Path{
 					d += c;
 					buffer.splice(0, 2);
 				}
-				else error();
+				else error(5);
 				break;
 			}
 			index = this.next(index);
-			console.log('next'+index);
-		}while(this.next(index) != this.head);
+		}
 
-		if (error_flag) return 'error';
+		if (error_flag) return 'error'+error_code;
 		if (this.closed) d+='Z';
 		return d;
 
-		function error(){
+		function error(code){
 			error_flag = true;
+			error_code = code;
 		}
 	}
 
@@ -93,7 +96,10 @@ class Path{
 		if(this.closed) return;
 		let new_node = new Node(x,y,'line');
 		this.nodes.splice(this.tail+1, 0, new_node);
-		this.next(this.tail);
+		this.tail = this.next(this.tail);
+
+		console.log('tail'+this.tail);
+		console.log(this.nodes);
 	}
 
 	cut(p1, p2){
@@ -110,9 +116,11 @@ class Path{
 				node_t = this.nodes[this.tail];
 
 			let cut_size = this.head-this.tail-1;
-			this.nodes.splice(this.tail, cut_size);
+			this.nodes.splice(this.tail+1, cut_size);
 			this.closed = false;
 			this.head = this.nodes.indexOf(node_h);
+			console.log('head' + this.head);
+
 			this.tail = this.nodes.indexOf(node_t) + this.head;
 			return [this];
 		}
@@ -147,22 +155,25 @@ class Path{
 	}
 }
 
-// export {Node, Path};
-let n0 = new Node(100, 100, 'curve'),
-	n1 = new Node(50, 150, 'offcurve'),
-	n2 = new Node(200, 150, 'offcurve'),
-	n3 = new Node(250, 100, 'smooth'),
-	n4 = new Node(300, 70, 'offcurve'),
-	n5 = new Node(350, 150, 'offcurve'),
-	n6 = new Node(400, 100, 'curve'),
-	n7 = new Node(380, 50, 'line'),
-	n8 = new Node(250, 50, 'line'),
-	path = new Path([n0,n1,n2,n3,n4,n5,n6,n7,n8], true);
-	console.log(path.toString());
+export {Node, Path};
+
+// let n0 = new Node(100, 100, 'curve'),
+// 	n1 = new Node(50, 150, 'offcurve'),
+// 	n2 = new Node(200, 150, 'offcurve'),
+// 	n3 = new Node(250, 100, 'smooth'),
+// 	n4 = new Node(300, 70, 'offcurve'),
+// 	n5 = new Node(350, 150, 'offcurve'),
+// 	n6 = new Node(400, 100, 'curve'),
+// 	n7 = new Node(380, 50, 'line'),
+// 	n8 = new Node(250, 50, 'line'),
+// 	path = new Path([n0,n1,n2,n3,n4,n5,n6,n7,n8], true);
+
+// // path.addPoint(10,10);
+// 	// console.log(path.toString());
 // let cuted = path.cut(n5, n6);
 // console.log(`head ${cuted[0].head}`);
 // console.log(`tail ${cuted[0].tail}`);
 // console.log(cuted[0].toString());
-// console.log(cuted[1].nodes);
+// console.log(cuted[0].nodes);
 
 
