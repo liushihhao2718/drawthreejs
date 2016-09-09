@@ -1,5 +1,5 @@
 {
-  "name": "es6骨架",
+  "name": "threeDeawing",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -16,8 +16,7 @@
     "watchify": "3.7.0"
   },
   "dependencies": {
-    "mathjs": "^3.4.1",
-    "three":"*"
+    "mathjs": "^3.4.1"
   },
   "ava": {
     "files": [
