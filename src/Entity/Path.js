@@ -40,13 +40,6 @@ class Path{
 			handle = key;
 		}
 
-		// this.tail = uuid.v1();
-		// this.nodeMap.get(handle).next = this.tail;
-		// nodes[nodes.length-1].prev = handle;
-
-		// this.nodeMap.set(this.tail, nodes[i]);
-			
-
 		if (closed) {
 			this.nodeMap.get(this.head).prev = handle;
 			this.nodeMap.get(handle).next = this.head;
@@ -150,25 +143,122 @@ class Path{
 	cut(){}
 
 	deleteNode(key) {
-		let next_key = this.nodeMap.get(key).next;
-		while(this.nodeMap.get(next_key) !=undefined && this.nodeMap.get(next_key).type === 'offcurve'){
-			const temp = this.nodeMap.get(next_key).next;
-			this.nodeMap.delete(next_key);
-			next_key = temp;
-		}
-		let prev_key = this.nodeMap.get(key).prev;
-		while(this.nodeMap.get(prev_key) != undefined && this.nodeMap.get(prev_key).type === 'offcurve'){
-			const temp = this.nodeMap.get(prev_key).prev;
-			this.nodeMap.delete(prev_key);
-			prev_key = temp;
-		}
-		if (prev_key != undefined) this.nodeMap.get(prev_key).next = next_key;
+		let leftKey = this.nodeMap.get(key).prev,
+			rightKey = this.nodeMap.get(key).next,
+			L,R;
 
-		if (next_key != undefined) this.nodeMap.get(next_key).prev = prev_key;
-		if (key === this.head) this.head = next_key;
-		if (key === this.tail) this.tail = prev_key;
+		if(key === this.head){
+			/** head => (rightKey) => (right2Key) => R
+				 *
+				 *  			head == R
+			*/
+			if (rightKey){
+				if(this.isOff(rightKey)){
+					let right2Key = this.nodeMap.get(rightKey).next;
+					R = this.nodeMap.get(right2Key).next;
+					this.nodeMap.delete(rightKey);
+					this.nodeMap.delete(right2Key);	
+				}
+				else {
+					R = rightKey;
+				}		
+				this.nodeMap.delete(this.head);
+				this.head = R;
+				this.nodeMap.get(this.head).prev = undefined;
+			}
+		}else if(key === this.tail){
+			/** L => (left2Key) => (leftKey) => tail
+			 *
+			 *  			tail == L
+			*/
+			console.log(this.nodeMap.get(leftKey).toString());
+			if(leftKey){
+				if (this.isOff(leftKey)) {
+					let left2Key = this.nodeMap.get(leftKey).prev;
+					L = this.nodeMap.get(left2Key).prev;
+					this.nodeMap.delete(leftKey);
+					this.nodeMap.delete(left2Key);
+				}
+				else{
+					L = leftKey;
+				}
 
+				this.nodeMap.delete(this.tail);
+				this.tail = L;
+				this.nodeMap.get(this.tail).next = undefined;
+			}
+
+		}
+		else if(!this.isOff(leftKey) && !this.isOff(rightKey)){
+			L = this.nodeMap.get(key).prev,
+			R = this.nodeMap.get(key).next;
+			if(L) this.nodeMap.get(L).next = R;
+			if(R) this.nodeMap.get(R).prev = L;
+
+			this.nodeMap.delete(key);
+		}
+		else if(this.isOff(leftKey) && this.isOff(rightKey)) {
+			/** L => leftKey => key => rightKey => R
+			 *
+			 *  			L => R
+			*/
+			L = this.nodeMap.get(leftKey).prev,
+			R = this.nodeMap.get(rightKey).next;
+			this.nodeMap.get(L).next = R;
+			this.nodeMap.get(R).prev = L;
+
+			this.nodeMap.delete(key);
+			this.nodeMap.delete(leftKey);
+			this.nodeMap.delete(rightKey);
+		}
+		else if(this.isOff(leftKey) && !this.isOff(rightKey)) {
+			/** L => (left2Key) =>leftKey => key => R
+			 *
+			 *  			L => R
+			*/
+			let left2Key = this.nodeMap.get(leftKey).prev;
+			if (this.isOff(left2Key)) {
+				L = this.nodeMap.get(left2Key).prev;
+				this.nodeMap.delete(left2Key);
+			}
+			else{
+				L = left2Key;
+			}
+			R = rightKey;
+
+			this.nodeMap.get(L).next = R;
+			this.nodeMap.get(R).prev = L;
+
+			this.nodeMap.delete(key);
+			this.nodeMap.delete(leftKey);
+		}
+		else if(!this.isOff(leftKey) && this.isOff(rightKey)){
+			/** L => key => rightKey => (right2Key) => R
+				 *
+				 *  			L => R
+			*/
+			let right2Key = this.nodeMap.get(rightKey).next;
+			if (this.isOff(right2Key)) {
+				R = this.nodeMap.get(right2Key).next;
+				this.nodeMap.delete(right2Key);
+			}
+			else {
+				R = right2Key;
+			}
+			L = leftKey;
+
+			if(L) this.nodeMap.get(L).next = R;
+			if(R) this.nodeMap.get(R).prev = L;
+			this.nodeMap.delete(key);
+			this.nodeMap.delete(rightKey);
+		}
 	}
+	isOff(k) {
+		if(k === undefined) return false;
+
+		return (this.nodeMap.get(k).type == 'offcurve');
+	}
+
 }
 
 export {Node, Path};

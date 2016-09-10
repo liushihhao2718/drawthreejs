@@ -66,7 +66,6 @@ test('curve between tail and head', t=>{
 		n5 = new Node(350, 150, 'offcurve'),
 		path = new Path([n0,n1,n2,n3,n4,n5], true),
 		d = 'M100,100 C50,150 200,150 250,100 C300,70 350,150 100,100';
-console.log(path.nodeMap);
 	t.true(path.toString() === d);
 
 });
@@ -89,7 +88,7 @@ test('add node to open path', t=>{
 	t.true(path.toString() === d);
 });
 
-test('delete head node', t=>{
+test('delete head node in open path', t=>{
 	const path = make_test_path(false),
 		d = 'M250,100 C300,70 350,150 400,100 L380,50 L250,50';
 	
@@ -97,7 +96,7 @@ test('delete head node', t=>{
 	t.true(path.toString() === d);
 });
 
-test('delete tail node', t=>{
+test('delete tail node in open path', t=>{
 	const path = make_test_path(false),
 		d = 'M100,100 C50,150 200,150 250,100 C300,70 350,150 400,100 L380,50';
 	
@@ -105,7 +104,7 @@ test('delete tail node', t=>{
 	t.true(path.toString() === d);
 });
 
-test('delete curve node', t=>{
+test('delete curve node open path', t=>{
 	const path = make_test_path(false),
 		d = 'M100,100 C50,150 350,150 400,100 L380,50 L250,50';
 
@@ -113,9 +112,7 @@ test('delete curve node', t=>{
 	iter.next();
 	iter.next();
 	iter.next();
-	iter.next();
 	const k3 = iter.next().value;
-	console.log(path.nodeMap.get(k3).type);
 	path.deleteNode(k3);
 	t.true(path.toString() === d);
 });
