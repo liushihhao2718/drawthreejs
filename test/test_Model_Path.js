@@ -8,25 +8,67 @@ test('make a Node', t=>{
 	t.true(test_node.toString() === checkString);
 });
 function make_test_path(close = true){
-	let n1 = new Node(100, 100, 'curve'),
-		n2 = new Node(50, 150, 'offcurve'),
-		n3 = new Node(200, 150, 'offcurve'),
-		n4 = new Node(250, 100, 'smooth'),
-		n5 = new Node(300, 70, 'offcurve'),
-		n6 = new Node(350, 150, 'offcurve'),
-		n7 = new Node(400, 100, 'curve'),
-		n8 = new Node(380, 50, 'line'),
-		n9 = new Node(250, 50, 'line');
+	let n0 = new Node(100, 100, 'curve'),
+		n1 = new Node(50, 150, 'offcurve'),
+		n2 = new Node(200, 150, 'offcurve'),
+		n3 = new Node(250, 100, 'smooth'),
+		n4 = new Node(300, 70, 'offcurve'),
+		n5 = new Node(350, 150, 'offcurve'),
+		n6 = new Node(400, 100, 'curve'),
+		n7 = new Node(380, 50, 'line'),
+		n8 = new Node(250, 50, 'line');
 
-	return new Path([n1,n2,n3,n4,n5,n6,n7,n8,n9], close);
+	return new Path([n0,n1,n2,n3,n4,n5,n6,n7,n8], close);
 }
 test('make a close Path with nodes', t=>{
 
 	let path_close = true,
 		path = make_test_path(path_close),
-		d = 'M100,100 C50,150 200,150 250,100 C300,70 350,150 400,100 L380,50 L250,50Z';
+		handle = path.head;
+	t.true(path.nodeMap.get(handle).toString() === '100 100 curve');
+	handle = path.nodeMap.get(handle).next;
+	t.true(path.nodeMap.get(handle).toString() === '50 150 offcurve');
+
+	handle = path.tail;
+	t.true(path.nodeMap.get(handle).toString() === '100 100 curve');
+
+	handle = path.nodeMap.get(handle).prev;
+	t.true(path.nodeMap.get(handle).toString() === '250 50 line');
+});
+
+test('make a close Path with nodes 2', t=>{
+
+
+	let n0 = new Node(100, 100, 'curve'),
+		n1 = new Node(50, 150, 'offcurve'),
+		n2 = new Node(200, 150, 'offcurve'),
+		n3 = new Node(250, 100, 'smooth'),
+		n4 = new Node(300, 70, 'offcurve'),
+		n5 = new Node(350, 150, 'offcurve'),
+		n6 = new Node(400, 100, 'curve'),
+		n7 = new Node(380, 50, 'curve'),
+		n8 = new Node(250, 50, 'curve'),
+		path = new Path([n0,n1,n2,n3,n4,n5,n6,n7,n8], true),
+		d = 'M100,100 C50,150 200,150 250,100 C300,70 350,150 400,100 L380,50 L250,50 L100,100';
 
 	t.true(path.toString() === d);
+
+});
+
+test('curve between tail and head', t=>{
+
+
+	let n0 = new Node(100, 100, 'curve'),
+		n1 = new Node(50, 150, 'offcurve'),
+		n2 = new Node(200, 150, 'offcurve'),
+		n3 = new Node(250, 100, 'smooth'),
+		n4 = new Node(300, 70, 'offcurve'),
+		n5 = new Node(350, 150, 'offcurve'),
+		path = new Path([n0,n1,n2,n3,n4,n5], true),
+		d = 'M100,100 C50,150 200,150 250,100 C300,70 350,150 100,100';
+console.log(path.nodeMap);
+	t.true(path.toString() === d);
+
 });
 
 test('make a open Path with nodes', t=>{
@@ -47,60 +89,33 @@ test('add node to open path', t=>{
 	t.true(path.toString() === d);
 });
 
-test('cut the close path', t =>{
-	let n0 = new Node(100, 100, 'curve'),
-		n1 = new Node(50, 150, 'offcurve'),
-		n2 = new Node(200, 150, 'offcurve'),
-		n3 = new Node(250, 100, 'smooth'),
-		n4 = new Node(300, 70, 'offcurve'),
-		n5 = new Node(350, 150, 'offcurve'),
-		n6 = new Node(400, 100, 'curve'),
-		n7 = new Node(380, 50, 'line'),
-		n8 = new Node(250, 50, 'line'),
-		path = new Path([n0,n1,n2,n3,n4,n5,n6,n7,n8], true);
+test('delete head node', t=>{
+	const path = make_test_path(false),
+		d = 'M250,100 C300,70 350,150 400,100 L380,50 L250,50';
 	
-	path.cut(n5, n6);
-
-	let new_path = new Path([n6,n7,n8,n0,n1,n2,n3], false);
-	t.true(path.toString() == new_path.toString());
+	path.deleteNode(path.head);
+	t.true(path.toString() === d);
 });
 
-test('cut the open path 5 6', t =>{
-	let n0 = new Node(100, 100, 'curve'),
-		n1 = new Node(50, 150, 'offcurve'),
-		n2 = new Node(200, 150, 'offcurve'),
-		n3 = new Node(250, 100, 'smooth'),
-		n4 = new Node(300, 70, 'offcurve'),
-		n5 = new Node(350, 150, 'offcurve'),
-		n6 = new Node(400, 100, 'curve'),
-		n7 = new Node(380, 50, 'line'),
-		n8 = new Node(250, 50, 'line'),
-		path = new Path([n0,n1,n2,n3,n4,n5,n6,n7,n8], false);
+test('delete tail node', t=>{
+	const path = make_test_path(false),
+		d = 'M100,100 C50,150 200,150 250,100 C300,70 350,150 400,100 L380,50';
 	
-	let cuted = path.cut(n5, n6);
-
-	let p1 = new Path([n0,n1,n2,n3], false),
-		p2 = new Path([n6,n7,n8], false);
-	t.true(cuted[0].toString() == p1.toString());
-	t.true(cuted[1].toString() == p2.toString());
+	path.deleteNode(path.tail);
+	t.true(path.toString() === d);
 });
 
-test('cut the open path 4 5', t =>{
-	let n0 = new Node(100, 100, 'curve'),
-		n1 = new Node(50, 150, 'offcurve'),
-		n2 = new Node(200, 150, 'offcurve'),
-		n3 = new Node(250, 100, 'smooth'),
-		n4 = new Node(300, 70, 'offcurve'),
-		n5 = new Node(350, 150, 'offcurve'),
-		n6 = new Node(400, 100, 'curve'),
-		n7 = new Node(380, 50, 'line'),
-		n8 = new Node(250, 50, 'line'),
-		path = new Path([n0,n1,n2,n3,n4,n5,n6,n7,n8], false);
-	
-	let cuted = path.cut(n4, n5);
+test('delete curve node', t=>{
+	const path = make_test_path(false),
+		d = 'M100,100 C50,150 350,150 400,100 L380,50 L250,50';
 
-	let p1 = new Path([n0,n1,n2,n3], false),
-		p2 = new Path([n6,n7,n8], false);
-	t.true(cuted[0].toString() == p1.toString());
-	t.true(cuted[1].toString() == p2.toString());
+	let iter = path.nodeMap.keys();
+	iter.next();
+	iter.next();
+	iter.next();
+	iter.next();
+	const k3 = iter.next().value;
+	console.log(path.nodeMap.get(k3).type);
+	path.deleteNode(k3);
+	t.true(path.toString() === d);
 });

@@ -16,16 +16,16 @@
     "watchify": "3.7.0"
   },
   "dependencies": {
-    "mathjs": "^3.4.1"
+    "mathjs": "^3.4.1",
+    "uuid": "^2.0.2"
   },
   "ava": {
     "files": [
       "test/*.js"
     ],
-     "require": [
+    "require": [
       "babel-register"
     ],
     "babel": "inherit"
-
   }
 }

@@ -4,7 +4,8 @@
         "es6": true
     },
     "globals":{
-        "THREE":true
+        "THREE":true,
+        "require":true
     },
     "parserOptions": {
         "ecmaVersion": 6,
@@ -14,7 +15,8 @@
     "rules": {
         "indent": [
             "error",
-            "tab"
+            "tab",
+            {"SwitchCase":1}
         ],
         "linebreak-style": [
             "error",
