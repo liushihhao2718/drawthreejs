@@ -258,7 +258,85 @@ class Path{
 
 		return (this.nodeMap.get(k).type == 'offcurve');
 	}
+	renderSegment(){
+		let state = 'start',buffer=[], segments = [];
+		let error_flag = false;
+		let index = this.head;
 
+		let error_code = 0;
+
+		let round = this.nodeMap.size;
+		if (this.closed) round++;//
+		for(let i=0;i<=round;i++){
+
+			if (index === undefined) break;
+			let n = this.nodeMap.get(index);
+
+			if (error_flag)  break;
+			switch(state){
+				case 'start':
+					if (n.type != 'offcurve') {
+						state = 'curve';
+						buffer.push(n);
+					}
+					else error(1);
+					break;
+				case 'curve':
+					if(n.type === 'line' || n.type === 'curve'){
+						state = 'line';
+						segments.push([buffer[0], n]);
+						buffer.pop();
+						buffer.push(n);
+					}
+					else if(n.type === 'offcurve'){
+						state = 'offcurve';
+						buffer.push(n);
+					}else error(2);
+					break;
+				case 'line':
+					if(n.type === 'line'){
+						state = 'line';
+						segments.push([buffer[0], n]);
+						buffer.pop();
+						buffer.push(n);
+					}
+					else if(n.type === 'curve' || n.type==='smooth'){
+						state = 'curve';
+						segments.push([buffer[0], n]);
+						buffer.pop();
+						buffer.push(n);
+					}
+					else error(3);
+					break;
+				case 'offcurve':
+					if(n.type === 'offcurve') {
+						state = 'offcurve2';
+						buffer.push(n);
+					}
+					else error(4);
+					break;
+				case 'offcurve2':
+					if(n.type === 'curve' || n.type==='smooth'){
+						state = 'curve';
+						segments.push([ buffer[0], buffer[1], buffer[2],n ]);
+						buffer.pop();
+						buffer.push(n);
+						buffer.splice(0, 2);
+					}
+					else error(5);
+					break;
+			}
+			index = this.nodeMap.get(index).next;
+		}
+
+		if (error_flag) return 'error'+error_code;
+		return segments;
+
+		function error(code){
+			error_flag = true;
+			error_code = code;
+		}
+	}
 }
 
 export {Node, Path};

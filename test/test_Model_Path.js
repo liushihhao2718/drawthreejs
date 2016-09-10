@@ -116,3 +116,25 @@ test('delete curve node open path', t=>{
 	path.deleteNode(k3);
 	t.true(path.toString() === d);
 });
+
+test('make segments', t=>{
+	const path = make_test_path(true);
+	let str = '';
+	for(let seg of path.renderSegment()){
+		let d = '[';
+		for(let n of seg){
+			d += n.toString();
+			d += ', ';
+		}
+		d+=']\t';
+		str +=d;
+	}
+
+	let check = 
+	'[100 100 curve, 50 150 offcurve, 200 150 offcurve, 250 100 smooth, ]\
+	[250 100 smooth, 300 70 offcurve, 350 150 offcurve, 400 100 curve, ]\
+	[400 100 curve, 380 50 line, ]\
+	[380 50 line, 250 50 line, ]\
+	[250 50 line, 100 100 curve, ]\t';
+	t.true(str === check);
+});
